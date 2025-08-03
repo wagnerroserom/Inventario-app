@@ -1,0 +1,28 @@
+ PASO 1: Probar el Registro (POST /api/auth/register)
+1. En Thunder Client:
+Haz clic en + New Request
+
+2. Configura:
+Método: POST
+URL: http://localhost:4000/api/auth/register
+
+3. Ve a la pestaña Body
+
+Selecciona raw
+
+Cambia a JSON
+
+Pega esto para agregar un nuevo usuario:
+{
+  "name": "Ana Gómez", // Cambia nombre
+  "email": "ana@example.com", // Cambia correo
+  "password": "123456" // Cambia contraseña
+}
+
+Pega esto para revisar usuario:
+{
+  "email": "ana@example.com", // Cambia correo
+  "password": "123456" // Cambia password
+}
+
+TOKEN DE GEOVANNY ZEVALLOS: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiZW1haWwiOiJnZW9AZXhhbXBsZS5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc1NDI0ODAwMCwiZXhwIjoxNzU0ODUyODAwfQ.nK4VmQI20aLT0CvVzX1fPIp-6-1jCfA_ob2I8M0cj1s

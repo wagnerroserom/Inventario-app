@@ -2,13 +2,13 @@
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-require('dotenv').config(); // ⬅️ Carga las variables del .env
+require('dotenv').config(); // Carga las variables del .env
 
 // Importar y conectar Prisma Client
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-//Importa middleware de autenticación
+// Importa middleware de autenticación
 const { auth } = require('./middleware/auth');
 
 const app = express();
@@ -43,14 +43,14 @@ app.get('/api/products', async (req, res) => {
     }
 });
 
-//Ruta protegida, sólo se puede acceder con token JWT válido
+// Ruta protegida, sólo se puede acceder con token JWT válido
 app.get('/api/protected', auth, (req, res) => {
     res.json({
         message: 'Ruta protegida accesible',
     });
 });
 
-//Rutas de autenticación
+// Rutas de autenticación
 const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
 
