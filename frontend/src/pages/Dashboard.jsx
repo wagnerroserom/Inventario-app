@@ -12,6 +12,8 @@ export default function Dashboard() {
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [deletingProduct, setDeletingProduct] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showLowStock, setShowLowStock] = useState(false);
   const navigate = useNavigate();
 
   // Verificar autenticación
@@ -47,6 +49,13 @@ export default function Dashboard() {
     }
   };
 
+  // Filtrar productos
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLowStock = showLowStock ? product.stock < 5 : true;
+    return matchesSearch && matchesLowStock;
+  });
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Barra lateral */}
@@ -58,7 +67,6 @@ export default function Dashboard() {
         <nav className="bg-white shadow-sm px-6 py-4">
           <div className="flex justify-between items-center">
             <h1 className="text-xl font-semibold text-gray-800">Dashboard</h1>
-            {/* Botón de cierre de sesión en móvil */}
             <button
               onClick={() => {
                 localStorage.removeItem('token');
@@ -74,38 +82,86 @@ export default function Dashboard() {
         {/* Contenido principal */}
         <main className="py-8 px-6">
           <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold text-gray-800">Productos</h2>
-              <button
-                onClick={() => setShowModal(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
-              >
-                + Nuevo Producto
-              </button>
+
+            {/* Búsqueda y filtros */}
+            <div className="bg-white p-6 rounded-lg shadow mb-6">
+              <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+                {/* Campo de búsqueda */}
+                <div className="flex-1 w-full">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Buscar producto
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Buscar por nombre..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Filtro de stock bajo */}
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="lowStock"
+                    checked={showLowStock}
+                    onChange={(e) => setShowLowStock(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="lowStock" className="ml-2 text-sm text-gray-700">
+                    Mostrar solo stock bajo
+                  </label>
+                </div>
+
+                {/* Botón Nuevo Producto */}
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition whitespace-nowrap"
+                >
+                  + Nuevo Producto
+                </button>
+              </div>
             </div>
 
+            {/* Tabla de productos */}
             {loading ? (
               <div className="bg-white p-6 rounded-lg shadow text-center">
                 Cargando productos...
               </div>
-            ) : products.length === 0 ? (
+            ) : filteredProducts.length === 0 ? (
               <div className="bg-white p-6 rounded-lg shadow text-center">
-                <p className="text-gray-500">No hay productos registrados.</p>
+                <p className="text-gray-500">
+                  {products.length === 0
+                    ? 'No hay productos registrados.'
+                    : 'No hay productos que coincidan con los filtros.'
+                  }
+                </p>
               </div>
             ) : (
               <div className="bg-white shadow rounded-lg overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Nombre
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Precio
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Stock
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Categoría
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Acciones
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {products.map((product) => (
+                    {filteredProducts.map((product) => (
                       <tr key={product.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {product.name}
@@ -113,8 +169,14 @@ export default function Dashboard() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           ${product.price.toFixed(2)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {product.stock}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {product.stock < 5 ? (
+                            <span className="text-red-600 font-bold">
+                              ⚠️ {product.stock} (bajo)
+                            </span>
+                          ) : (
+                            <span className="text-green-600">{product.stock}</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {product.category?.name || 'Sin categoría'}
